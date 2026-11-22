@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 import json  # noqa: E402
+from PIL import Image  # noqa: E402
 from matplotlib.lines import Line2D  # noqa: E402
 from matplotlib.patches import FancyBboxPatch, FancyArrowPatch  # noqa: E402
 from fastweight_vit.gallery import SELECTED, load_gallery  # noqa: E402
@@ -114,9 +115,9 @@ def execution_k_sweep(results):
 
 def fast_weight_lens():
     """Trace one head from image-conditioned weights to a source-slot map."""
-    fig, ax = plt.subplots(figsize=(5.50, 1.40))
+    fig, ax = plt.subplots(figsize=(5.50, 1.24))
     fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
-    ax.set(xlim=(0, 5.50), ylim=(.17, 1.72))
+    ax.set(xlim=(0, 5.50), ylim=(.10, 1.72))
     ax.set_aspect('auto')
     ax.axis('off')
 
@@ -126,6 +127,8 @@ def fast_weight_lens():
     blue = '#eaf2f9'
     teal = '#e7f3ef'
     accent = '#bd6337'
+    e1_col = '#3b6990'
+    e3_col = '#2f6f5e'
 
     def box(x, y, w, h, label, fill='white', stroke=edge, size=7.5):
         ax.add_patch(FancyBboxPatch((x, y), w, h,
@@ -143,57 +146,68 @@ def fast_weight_lens():
                                     arrowstyle='-|>', mutation_scale=7,
                                     color=color, linewidth=width))
 
-    ax.text(.10, 1.60, 'FIXED IMAGE  ·  ONE LAYER  ·  ONE HEAD', fontsize=7.2,
+    ax.text(.10, 1.63, 'FIXED IMAGE  ·  ONE LAYER  ·  ONE HEAD', fontsize=7.2,
             fontweight='bold', color=ink, va='center')
-    ax.text(.11, 1.45, 'SOURCE WEIGHTS', fontsize=7.0,
+    ax.text(.11, 1.48, 'SOURCE WEIGHTS', fontsize=7.0,
             fontweight='bold', color=ink, va='center')
-    ax.text(1.43, 1.45, 'QUERY READOUT', fontsize=7.0,
+    ax.text(1.43, 1.48, 'QUERY READOUT', fontsize=7.0,
             fontweight='bold', color=ink, va='center')
 
     # The highlighted source is one of the tokens entering the same joint softmax.
     for n, x in enumerate((.08, .16, .24)):
-        ax.add_patch(FancyBboxPatch((x, .92 - .055 * n), .17, .27,
+        ax.add_patch(FancyBboxPatch((x, .89 - .055 * n), .17, .27,
                                    boxstyle='round,pad=0.005,rounding_size=0.025',
                                    facecolor='white' if n < 2 else '#fae9df',
                                    edgecolor=edge if n < 2 else accent,
                                    linewidth=.7))
-    ax.text(.25, .71, r'source $j$', fontsize=7.2, color=ink, ha='center', va='center')
-    box(.50, 1.03, .85, .28, r'key $k_j$', fill=blue)
-    box(.50, .64, .98, .32, '', fill=teal)
-    ax.text(.99, .862, 'transformed value', ha='center', va='center', color=ink, fontsize=7.1)
-    ax.text(.99, .730, r'$z_j=W_O\,v_j$', ha='center', va='center', color=ink, fontsize=9.6)
+    ax.text(.25, .68, r'source $j$', fontsize=7.2, color=ink, ha='center', va='center')
+    box(.50, 1.00, .85, .28, r'key $k_j$', fill=blue)
+    box(.50, .60, .98, .33, '', fill=teal)
+    ax.text(.99, .845, 'projected value', ha='center', va='center', color=ink, fontsize=7.0)
+    ax.text(.99, .692, r'$z_j=W_O\,v_j$', ha='center', va='center', color=ink, fontsize=9.2)
 
-    box(1.43, .99, .44, .32, r'$q_i$', fill='#f1f4f6', stroke=ink, size=10)
-    box(2.02, 1.01, .75, .32, r'$q_i^\top k_j/\sqrt{d}$', fill=blue, size=9)
-    box(2.92, .99, .62, .34, 'joint\n' + r'$\mathrm{softmax}_j$', fill=blue, size=8)
-    box(3.68, 1.01, .39, .32, r'$a_{ij}$', fill='#dcebf7', stroke='#5687ad', size=10)
-    box(4.22, 1.01, .62, .32, r'$a_{ij}\,z_j$', fill=teal, stroke='#478674', size=10)
-    box(4.99, 1.01, .40, .32, r'$\sum_j$', fill='#f1f4f6', stroke=ink, size=10)
+    box(1.43, .96, .44, .32, r'$q_i$', fill='#f1f4f6', stroke=ink, size=10)
+    box(2.02, .98, .75, .32, r'$q_i^\top k_j/\sqrt{d}$', fill=blue, size=9)
+    box(2.92, .96, .62, .34, 'joint\n' + r'$\mathrm{softmax}_j$', fill=blue, size=8)
+    box(3.68, .98, .39, .32, r'$a_{ij}$', fill='#dcebf7', stroke='#5687ad', size=10)
+    box(4.22, .98, .62, .32, r'$a_{ij}\,z_j$', fill=teal, stroke='#478674', size=10)
+    box(4.99, .96, .40, .35, '', fill='#f1f4f6', stroke=ink)
+    ax.text(5.19, 1.155, r'$\sum_j$', ha='center', va='center', color=ink, fontsize=8.5)
 
-    arrow((1.35, 1.17), (2.11, 1.33), color='#5d84a6',
-          bends=[(1.35, 1.38), (2.11, 1.38)])
-    arrow((1.87, 1.14), (2.02, 1.14), color=ink)
-    arrow((2.77, 1.17), (2.92, 1.17), color=ink)
-    arrow((3.54, 1.17), (3.68, 1.17), color=ink)
-    arrow((4.07, 1.17), (4.22, 1.17), color=ink)
-    arrow((4.84, 1.17), (4.99, 1.17), color=ink)
-    ax.text(3.865, 1.43, 'activation', fontsize=7.0, ha='center', color=ink)
-    ax.text(4.53, 1.43, 'contribution', fontsize=7.0, ha='center', color=ink)
-    ax.text(5.19, 1.43, 'output', fontsize=7.0, ha='center', color=ink)
+    arrow((1.35, 1.14), (2.11, 1.30), color='#5d84a6',
+          bends=[(1.35, 1.35), (2.11, 1.35)])
+    arrow((1.87, 1.11), (2.02, 1.11), color=ink)
+    arrow((2.77, 1.14), (2.92, 1.14), color=ink)
+    arrow((3.54, 1.14), (3.68, 1.14), color=ink)
+    arrow((4.07, 1.14), (4.22, 1.14), color=ink)
+    arrow((4.84, 1.14), (4.99, 1.14), color=ink)
+    ax.text(3.865, 1.39, 'activation', fontsize=7.0, ha='center', color=ink)
+    ax.text(4.53, 1.39, 'contribution', fontsize=7.0, ha='center', color=ink)
+    ax.text(5.19, 1.39, 'output', fontsize=7.0, ha='center', color=ink)
 
-    # Keep the transformed value on a separate route until it is multiplied.
-    arrow((1.48, .80), (4.37, 1.01), color='#478674', width=.9,
-          bends=[(4.37, .80)])
-    ax.text(2.48, .71, r'the same $z_j$', fontsize=7.5, color=ink, ha='center')
+    # Annotate the three fast-weight hypotheses H1 (selectivity), H2 (origin), H3 (output norm).
+    ax.text(3.865, 1.56, 'H1: spatial prior?', fontsize=7.0, fontweight='bold',
+            ha='center', va='center', color=e1_col)
+    ax.text(.10, .23, r'H2: origin = slot $j$?', fontsize=7.0, fontweight='bold',
+            ha='left', va='center', color=accent)
+    ax.text(2.65, .655, r'H3: small norm $\|z_j\|$?', fontsize=7.0, fontweight='bold',
+            ha='center', va='center', color=e3_col)
 
-    ax.text(.11, .43, r'AT SOURCE SLOT $j$', fontsize=7.2,
+    # Keep the projected value on a separate route until it is multiplied.
+    arrow((1.48, .77), (4.37, .98), color='#478674', width=.9,
+          bends=[(4.37, .77)])
+    ax.text(2.65, .865, r'shared $z_j$', fontsize=7.2, color=ink, ha='center', va='center')
+
+    ax.text(.10, .40, r'AT SOURCE SLOT $j$', fontsize=7.0,
             color=ink, fontweight='bold', va='center')
-    box(1.55, .24, 1.48, .34, r'Received: $\sum_i a_{ij}$', fill=blue, size=8)
-    box(3.18, .24, 1.77, .34, r'Value weighted: $\sum_i a_{ij}\|z_j\|$', fill=teal, size=8)
-    arrow((3.87, 1.01), (2.29, .58), color='#5d84a6', width=.75,
-          bends=[(3.87, .64), (2.29, .64)])
-    arrow((4.53, 1.01), (4.06, .58), color='#478674', width=.75,
-          bends=[(4.53, .65), (4.06, .65)])
+    box(1.55, .14, 1.48, .34, '', fill=blue)
+    ax.text(2.29, .328, r'Received: $\sum_i a_{ij}$', ha='center', va='center', color=ink, fontsize=7.8)
+    box(3.18, .14, 1.77, .34, '', fill=teal)
+    ax.text(4.065, .328, r'Value weighted: $\sum_i a_{ij}\|z_j\|$', ha='center', va='center', color=ink, fontsize=7.8)
+    arrow((3.87, .98), (2.29, .48), color='#5d84a6', width=.75,
+          bends=[(3.87, .54), (2.29, .54)])
+    arrow((4.53, .98), (4.06, .48), color='#478674', width=.75,
+          bends=[(4.53, .54), (4.06, .54)])
 
     # The head and query sums are stated in the caption, where they can be read.
     fig.canvas.draw()
@@ -205,8 +219,43 @@ def fast_weight_lens():
     svg = svg.replace('<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"\n  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">\n', '')
     svg_path.write_text('\n'.join(line.rstrip() for line in svg.splitlines()) + '\n',
                         encoding='utf-8', newline='\n')
-    FILES.append(('fast_weight_lens', 5.50, 1.40))
+    FILES.append(('fast_weight_lens', 5.50, 1.24))
     plt.close(fig)
+
+
+def teaser_maps(data, pick=9, expected_index=8887):
+    """Page-1 teaser: one fixed-seed example overlaid with three readouts and human map."""
+    if int(data['index'][pick]) != expected_index:
+        raise ValueError(f'Expected gallery index {expected_index} at slot {pick}, got {data["index"][pick]}')
+    columns = [('image', 'Input image'), ('map_R0', 'Received attention'),
+               ('map_C3', 'Value weighting'), ('map_C2', 'Probe relocation'),
+               ('human', 'Human (ClickMe)')]
+    width, height = 5.50, 1.06
+    cell, gap = .90, .14
+    left = (width - (5 * cell + 4 * gap)) / 2
+    bottom = .01
+    fig = plt.figure(figsize=(width, height))
+    img = data['image'][pick]
+    for col, (key, label) in enumerate(columns):
+        x = left + col * (cell + gap)
+        ax = axes_at(fig, x, bottom, cell, cell)
+        ax.set_xticks([])
+        ax.set_yticks([])
+        for spine in ax.spines.values():
+            spine.set_visible(False)
+        ax.text(.5, 1.045, label, transform=ax.transAxes, ha='center', va='bottom', fontsize=7.0)
+        if key == 'image':
+            ax.imshow(img)
+        else:
+            value = data[key][pick]
+            value = value.reshape(14, 14) if value.size == 196 else value
+            value = (value - value.min()) / (value.max() - value.min() + 1e-12)
+            ax.imshow(img)
+            if key != 'human':
+                value = np.asarray(Image.fromarray(value.astype(np.float32)).resize((224, 224), Image.BILINEAR))
+            ax.imshow(value, cmap='inferno', vmin=0, vmax=1, alpha=0.62)
+    with plt.rc_context({'pdf.fonttype': 42, 'ps.fonttype': 42}):
+        check_and_save(fig, 'teaser_maps', pdf_dpi=200)
 
 
 def example_maps(data, name, picks, groups_per_row, cell, gap, group_gap):
@@ -261,6 +310,7 @@ def main():
         raise ValueError('Saved gallery differs from the fixed sample selection')
     example_maps(data, 'example_maps', [0, 1], 1, .6, .03, 0)
     example_maps(data, 'example_maps_more', [2, 3, 4, 5], 2, .52, .025, .2)
+    teaser_maps(data)
 
 
 if __name__ == '__main__':

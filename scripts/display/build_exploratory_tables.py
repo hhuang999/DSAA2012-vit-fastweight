@@ -22,16 +22,20 @@ def write_table(name, cols, header, body):
 def ci(mean, low, high):
     return f"{float(mean):.3f} [{float(low):.3f}, {float(high):.3f}]".replace("-", "$-$")
 
+
+def signed_ci(mean, low, high):
+    return f"{float(mean):+.3f} [{float(low):.3f}, {float(high):.3f}]".replace("-", "$-$")
+
 def spatial_table():
     study=json.loads((DATA/"spatial/summary.json").read_text(encoding="utf-8"))
-    labels={"R0":"Received attention", "C3":"Value weighting (own lengths)",
-            "donor_rank":"Same lengths in donor rank order", "ring_shuffle":"Same lengths shuffled within radius",
-            "norm_only":"Own lengths, mean attention", "C3v":"Unprojected value norm",
+    labels={"R0":"Received attention", "C3":"Value weighting (native norms)",
+            "donor_rank":"Donor-image norm order", "ring_shuffle":"Same-radius norm shuffle",
+            "norm_only":"Uniform attention, native norms", "C3v":"Unprojected value norm",
             "net_output":"Norm after summing heads"}
-    placement = {"R0": "Received attention", "C3": "Value weighting (own lengths)",
-                 "donor_rank": "Same lengths in donor rank order",
-                 "ring_shuffle": "Same lengths shuffled within radius",
-                 "norm_only": "Own lengths, mean attention"}
+    placement = {"R0": "Received attention", "C3": "Value weighting (native norms)",
+                 "donor_rank": "Donor-image norm order",
+                 "ring_shuffle": "Same-radius norm shuffle",
+                 "norm_only": "Uniform attention, native norms"}
     body=[]
     full=[]
     for method,label in labels.items():
@@ -77,7 +81,7 @@ def cls_table():
     methods = {"all_c3":"Value weighting, all queries", "cls_sum_head":"Value weighting, CLS only",
                "cls_net":"CLS, net vector"}
     metrics=("margin_spearman","auroc","ring_enrichment")
-    body, full, effects = [], [], []
+    body, full, effects, compact = [], [], [], []
     for model,source in (("DeiT-S","cls"),("DeiT-B","receiver_review/deit_b")):
         records = rows(source + "/three_endpoint_summary.csv")
         means = {(r["method"],r["endpoint"]):float(r["mean"]) for r in records}
@@ -94,13 +98,17 @@ def cls_table():
         for method,label in {"all_r0":"All queries, attention",**methods,
                              "cls_attention":"CLS, attention"}.items():
             full.append([model,label,*[f"{means[method,metric]:.3f}" for metric in metrics]])
+        compact_row = [model]
         for metric in metrics:
             r=next(r for r in contrasts if r["endpoint"] == metric)
             effects.append([model,{"margin_spearman":"Intervention $\\rho$","auroc":"Mask AUROC",
                                    "ring_enrichment":"Enrichment"}[metric],ci(r["mean"],r["low"],r["high"])])
+            compact_row.append(signed_ci(r["mean"], r["low"], r["high"]))
+        compact.append(compact_row)
     write_table("cls.tex","@{}llrrr@{}",r"Model & Readout & Intervention $\rho$ & Mask AUROC & Enrichment",body)
     write_table("cls_full.tex","@{}llrrr@{}",r"Model & Readout & Intervention $\rho$ & Mask AUROC & Enrichment",full)
     write_table("cls_effects.tex","@{}llr@{}",r"Model & Endpoint & CLS $-$ all queries [95\% CI]",effects)
+    write_table("cls_compact.tex","@{}lrrr@{}",r"Model & $\Delta$ Intervention $\rho$ & $\Delta$ Mask AUROC & $\Delta$ Enrichment",compact)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)

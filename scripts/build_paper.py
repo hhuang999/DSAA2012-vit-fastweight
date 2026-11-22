@@ -13,7 +13,7 @@ PAPER = Path(__file__).resolve().parents[1] / "paper"
 BUILD = PAPER.parent / "build" / "paper"
 STYLE_URL = "https://media.neurips.cc/Conferences/NeurIPS2025/Styles.zip"
 STYLE_HASH = "67a960f35da6fecb5a0ce0202fa400459f4c8bb6c294f1a3fdd82fbbd39244c2"
-FILENAME = "paper.pdf"
+FILENAME = "High_Attention_Low_Contribution_A_Fast_Weight_Diagnosis_of_ViT_Attention_Maps.pdf"
 
 
 def prepare_source(style):

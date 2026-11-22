@@ -99,23 +99,23 @@ def export(fig, stem, out, axes, row_groups, column_groups=()):
 
 
 def make_bridge_figure(diagnostics, tests, out):
-    fig = plt.figure(figsize=(5.5, 2.85))
-    upper = fig.add_gridspec(1, 3, left=0.17, right=0.985, bottom=0.635,
-                            top=0.85, wspace=0.43)
-    lower = fig.add_gridspec(1, 3, left=0.17, right=0.985, bottom=0.21,
-                            top=0.45, wspace=0.43)
+    fig = plt.figure(figsize=(5.5, 2.54))
+    upper = fig.add_gridspec(1, 3, left=0.17, right=0.985, bottom=0.66,
+                             top=0.81, wspace=0.49)
+    lower = fig.add_gridspec(1, 3, left=0.17, right=0.985, bottom=0.19,
+                             top=0.41, wspace=0.49)
     top_axes = [fig.add_subplot(upper[0, col]) for col in range(3)]
     low_axes = [fig.add_subplot(lower[0, col]) for col in range(3)]
-    panels = [("M1", "R0", "Specificity", "Mean-map\nshare (%)", (0, 25), [0, 10, 20]),
-              ("M2", "probe", "Location", "Index-probe\naccuracy (%)", (0, 105), [0, 50, 100]),
+    panels = [("M1", "R0", "H1: Spatial prior", "Mean-map\nshare (%)", (0, 25), [0, 10, 20]),
+              ("M2", "probe", "H2: Feature displacement", "Index-probe\naccuracy (%)", (0, 105), [0, 50, 100]),
               # Leave a little room below zero so DINO's zero series is visible above the frame.
-              ("M3", "R0", "Output magnitude", "High-norm\nshare (%)", (-2, 48), [0, 20, 40])]
+              ("M3", "R0", "H3: Low-norm output", "High-norm\nshare (%)", (-2, 48), [0, 20, 40])]
     diagnostic_data = []
     for index, (ax, spec) in enumerate(zip(top_axes, panels)):
         panel, variant, title, ylabel, limits, ticks = spec
         letter = chr(97 + index)
         ax.set_gid(letter)
-        panel_header(ax, letter, title, pad=3)
+        panel_header(ax, letter, title, subtitle="Diagnostic", pad=12)
         ax.axvspan(8.5, 12.5, color="#F0F0EE", lw=0, zorder=0)
         for model in MODELS:
             rows = sorted([r for r in diagnostics if r["model"] == model
@@ -142,7 +142,7 @@ def make_bridge_figure(diagnostics, tests, out):
             ("Mean subtraction", "Probe relocation", "Value weighting"))):
         letter = chr(100 + index)
         ax.set_gid(letter)
-        panel_header(ax, letter, title, pad=6)
+        panel_header(ax, letter, title, subtitle="Correction", pad=12)
         effect_axes(ax, (-0.14, 0.09), [-0.12, 0, 0.06],
                     0.02, labels=index == 0)
         ax.tick_params(axis="both", labelsize=7)
@@ -165,7 +165,7 @@ def make_bridge_figure(diagnostics, tests, out):
     fig.legend(handles=ref_handles, loc="lower center", bbox_to_anchor=(0.55, 0.005),
                frameon=False, ncol=2, fontsize=7, handletextpad=0.4,
                columnspacing=1.8)
-    fig.text(.57, .090, "Score difference (readout − comparator)", ha="center", fontsize=7)
+    fig.text(.57, .082, "Score difference (readout − comparator)", ha="center", fontsize=7)
     axes = top_axes + low_axes
     export(fig, "diagnosis_correction_bridge", out, axes,
            [["a", "b", "c"], ["d", "e", "f"]],
@@ -175,7 +175,7 @@ def make_bridge_figure(diagnostics, tests, out):
     write_source_data(audit_out / "diagnosis_correction_bridge.diagnostics.csv", diagnostic_data)
     write_source_data(audit_out / "diagnosis_correction_bridge.effects.csv", paired_data)
     return {"diagnostic_rows": len(diagnostic_data), "paired_rows": len(paired_data),
-            "width_in": 5.5, "height_in": 2.85}
+            "width_in": 5.5, "height_in": 2.54}
 
 
 def main():
