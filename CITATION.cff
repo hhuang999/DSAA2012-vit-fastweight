@@ -2,7 +2,7 @@ cff-version: 1.2.0
 message: "Please cite the course paper when using this code or its results."
 title: "High Attention, Low Contribution: A Fast-Weight Diagnosis of ViT Attention Maps"
 type: software
-repository-code: "https://github.com/hhuang999/vit-fastweight-lens"
+repository-code: "https://github.com/hhuang999/DSAA2012-vit-fastweight"
 authors:
   - family-names: Huang
     given-names: Hongbo

@@ -7,6 +7,7 @@ from pathlib import Path
 import matplotlib
 
 matplotlib.use("Agg")
+import matplotlib.font_manager  # noqa: E402
 import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
@@ -46,9 +47,14 @@ def make_placement_figure(csv_path: Path, summary_path: Path, out: Path):
         labels.append(label)
         colors.append(color)
 
+    for path in ("/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+                 "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf"):
+        if Path(path).exists():
+            matplotlib.font_manager.fontManager.addfont(path)
+
     plt.rcParams.update({
         "font.family": "sans-serif",
-        "font.sans-serif": ["Arial", "DejaVu Sans"],
+        "font.sans-serif": ["Arial", "Liberation Sans", "DejaVu Sans"],
         "font.size": 7,
         "axes.labelsize": 7,
         "xtick.labelsize": 7,
@@ -62,7 +68,7 @@ def make_placement_figure(csv_path: Path, summary_path: Path, out: Path):
     })
 
     fig = plt.figure(figsize=(3.35, 1.32))
-    ax = fig.add_axes([0.45, 0.25, 0.52, 0.70])
+    ax = fig.add_axes([0.488, 0.25, 0.482, 0.70])
     y = np.arange(len(ROWS))[::-1]
     ax.axvline(means[0], color="#4D5B66", ls="--", lw=0.8, zorder=1)
     ax.barh(y, means, height=0.58, color=colors, edgecolor="none", zorder=2)
@@ -78,7 +84,7 @@ def make_placement_figure(csv_path: Path, summary_path: Path, out: Path):
     ax.tick_params(axis="y", length=0, pad=3)
     ax.set_xlim(0.0, 0.205)
     ax.set_xticks([0.0, 0.05, 0.10, 0.15, 0.20])
-    ax.set_xlabel("Same-ring enrichment (383 pet crops)", labelpad=2)
+    ax.set_xlabel("Same-ring enrichment (383 pet crops)", labelpad=2, loc="right")
     ax.spines["left"].set_color("#8A96A3")
 
     fig.canvas.draw()

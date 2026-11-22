@@ -19,8 +19,8 @@ For the spatial control in Fig. 4, keeping projected norms at their native patch
 Clone the repository. The saved-results workflow uses Python 3.12, CPU PyTorch and no external dataset. Start the following commands at the repository root:
 
 ```bash
-git clone https://github.com/hhuang999/vit-fastweight-lens.git
-cd vit-fastweight-lens
+git clone https://github.com/hhuang999/DSAA2012-vit-fastweight.git
+cd DSAA2012-vit-fastweight
 python -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements-torch.txt --index-url https://download.pytorch.org/whl/cpu

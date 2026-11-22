@@ -131,15 +131,15 @@ refer to their original revisions, not missing active release files:
 
 | Historical reference | Exact source / release evidence |
 | --- | --- |
-| `docs/decisions.md` | [Historical source](https://github.com/hhuang999/vit-fastweight-lens/blob/1d66c0f7b39119e3ee7777ad7d086df68769d427/docs/decisions.md) |
-| `docs/experiment_plan_v5.md` | [Historical source](https://github.com/hhuang999/vit-fastweight-lens/blob/1d66c0f7b39119e3ee7777ad7d086df68769d427/docs/experiment_plan_v5.md) |
-| `results/predictions.csv` | [Historical source](https://github.com/hhuang999/vit-fastweight-lens/blob/7477ad5da9ab4d46f646ba2c0d2c3fe0316d9722/archive/results/predictions.csv) |
-| `results/diagnose_tests.csv` | [Historical source](https://github.com/hhuang999/vit-fastweight-lens/blob/7477ad5da9ab4d46f646ba2c0d2c3fe0316d9722/archive/results/diagnose_tests.csv) |
-| `results/history/reproduction_check.csv` | [Historical source](https://github.com/hhuang999/vit-fastweight-lens/blob/7477ad5da9ab4d46f646ba2c0d2c3fe0316d9722/archive/results/history/reproduction_check.csv) |
-| `results/d2/` | [Historical source](https://github.com/hhuang999/vit-fastweight-lens/tree/7477ad5da9ab4d46f646ba2c0d2c3fe0316d9722/archive/results/d2) |
+| `docs/decisions.md` | [Historical source](https://github.com/hhuang999/DSAA2012-vit-fastweight/blob/1d66c0f7b39119e3ee7777ad7d086df68769d427/docs/decisions.md) |
+| `docs/experiment_plan_v5.md` | [Historical source](https://github.com/hhuang999/DSAA2012-vit-fastweight/blob/1d66c0f7b39119e3ee7777ad7d086df68769d427/docs/experiment_plan_v5.md) |
+| `results/predictions.csv` | [Historical source](https://github.com/hhuang999/DSAA2012-vit-fastweight/blob/7477ad5da9ab4d46f646ba2c0d2c3fe0316d9722/archive/results/predictions.csv) |
+| `results/diagnose_tests.csv` | [Historical source](https://github.com/hhuang999/DSAA2012-vit-fastweight/blob/7477ad5da9ab4d46f646ba2c0d2c3fe0316d9722/archive/results/diagnose_tests.csv) |
+| `results/history/reproduction_check.csv` | [Historical source](https://github.com/hhuang999/DSAA2012-vit-fastweight/blob/7477ad5da9ab4d46f646ba2c0d2c3fe0316d9722/archive/results/history/reproduction_check.csv) |
+| `results/d2/` | [Historical source](https://github.com/hhuang999/DSAA2012-vit-fastweight/tree/7477ad5da9ab4d46f646ba2c0d2c3fe0316d9722/archive/results/d2) |
 
 Active outcomes are checked from `results/negative_controls.csv` (R1), `results/correct_tests.csv` (R2),
 and `results/variants.csv` (R3). Historical exploratory rules and their disclosures above are preserved;
 their presence is not a claim that they preceded the main results. See [provenance](provenance/README.md).
 
-The historical `scripts/make_tables.py` decision-rule reference above refers to the [preserved builder](https://github.com/hhuang999/vit-fastweight-lens/blob/7477ad5da9ab4d46f646ba2c0d2c3fe0316d9722/archive/scripts/make_tables.py); the active builder retains the numeric diagnostic summaries.
+The historical `scripts/make_tables.py` decision-rule reference above refers to the [preserved builder](https://github.com/hhuang999/DSAA2012-vit-fastweight/blob/7477ad5da9ab4d46f646ba2c0d2c3fe0316d9722/archive/scripts/make_tables.py); the active builder retains the numeric diagnostic summaries.

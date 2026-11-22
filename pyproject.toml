@@ -27,7 +27,7 @@ download = ["gdown==5.2.0"]
 paper = ["pymupdf==1.27.2.3"]
 
 [project.urls]
-Repository = "https://github.com/hhuang999/vit-fastweight-lens"
+Repository = "https://github.com/hhuang999/DSAA2012-vit-fastweight"
 
 [tool.setuptools.packages.find]
 where = ["src"]
