@@ -47,8 +47,8 @@ def verify(pdf):
         if not 0 <= last.find("Key parts of the code") < last.find("AI Use Statement"):
             raise ValueError("Missing final key code.")
         refs = re.findall(r"(?m)^\[(\d+)\] ", "\n".join(pages[4:]))
-        if list(map(int, refs)) != list(range(1, 37)):
-            raise ValueError("Expected 36 consecutive references.")
+        if list(map(int, refs)) != list(range(1, 44)):
+            raise ValueError("Expected 43 consecutive references.")
         destinations = doc.resolve_names()
         links = 0
         for page in doc:
@@ -67,7 +67,7 @@ def verify(pdf):
                             if kind == "Type3" else bool(doc.extract_font(ref)[3]))
                 if not embedded:
                     raise ValueError(f"Unembedded font: {name}")
-        print(f"{len(doc)} pages, four content pages, 36 references, {links} internal links.")
+        print(f"{len(doc)} pages, four content pages, 43 references, {links} internal links.")
 
 
 def main():

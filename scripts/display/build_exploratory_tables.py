@@ -7,7 +7,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "experiments"
 OUT = ROOT / "paper" / "tables"
-MODELS = {"deit": "DeiT-S", "deit_b": "DeiT-B", "dino": "DINO"}
+MODELS = {"deit": "DeiT-S", "deit_b": "DeiT-B", "dino": "DINO ViT-S"}
 def rows(filename):
     with (DATA / filename).open(encoding="utf-8", newline="") as stream:
         return list(csv.DictReader(stream))
@@ -49,7 +49,7 @@ def spatial_table():
             delta = ci(v["delta_C3"], *v["delta_C3_ci95"]) if method != "C3" else "---"
             body.append([placement[method], f"{v['mean']:.3f}", delta, f"{roc['mean']:.3f}"])
     write_table("spatial.tex","@{}lrrr@{}",r"Readout & Enrichment & $\Delta$Enrichment [95\% CI] & AUROC",body)
-    write_table("spatial_full.tex","@{}lrrr@{}",r"Reading & AUROC & $\Delta$AUROC [95\% CI] & Enrichment",full)
+    write_table("spatial_full.tex","@{}lrrr@{}",r"Readout & AUROC & $\Delta$AUROC [95\% CI] & Enrichment",full)
 
 
 def appendix_tables():
@@ -57,7 +57,7 @@ def appendix_tables():
     click=rows("endpoints/clickme_bootstrap.csv")
     body=[]
     for model,name in MODELS.items():
-        for control,label in (("R0","Received attention"),("stand_in_no_high","Zero high-norm")):
+        for control,label in (("R0","Received attention"),("stand_in_no_high","High-norm zeroing")):
             row=[name,label]
             for metric in ("p_target","kl"):
                 x=next(t for t in areas if (t["model"],t["a"],t["b"],t["metric"])==(model,"C3",control,metric))
@@ -65,7 +65,7 @@ def appendix_tables():
             x=next(t for t in click if (t["model"],t["a"],t["b"])==(model,"C3",control))
             row.append(ci(x["mean"],x["batch_low"],x["batch_high"]))
             body.append(row)
-    write_table("endpoint.tex","@{}llrrr@{}","Model & Comparator & Probability area & KL area & ClickMe",body)
+    write_table("endpoint.tex","@{}llrrr@{}","Model & Subtracted readout & Probability area & KL area & ClickMe",body)
 
     body = []
     for metric,filename in (("Enrichment","strata.csv"),("AUROC","auroc_strata.csv")):
@@ -79,7 +79,7 @@ def appendix_tables():
 
 def cls_table():
     methods = {"all_c3":"Value weighting, all queries", "cls_sum_head":"Value weighting, CLS only",
-               "cls_net":"CLS, net vector"}
+               "cls_net":"Norm after summing heads, CLS only"}
     metrics=("margin_spearman","auroc","ring_enrichment")
     body, full, effects, compact = [], [], [], []
     for model,source in (("DeiT-S","cls"),("DeiT-B","receiver_review/deit_b")):
@@ -95,8 +95,8 @@ def cls_table():
         values={r["endpoint"]:float(r["mean"]) for r in contrasts}
         body.append(["",r"\textbf{CLS $-$ all queries}",
                      *[rf"{{\boldmath${values[m]:+.3f}$}}" for m in metrics]])
-        for method,label in {"all_r0":"All queries, attention",**methods,
-                             "cls_attention":"CLS, attention"}.items():
+        for method,label in {"all_r0":"Received attention, all queries",**methods,
+                             "cls_attention":"Received attention, CLS only"}.items():
             full.append([model,label,*[f"{means[method,metric]:.3f}" for metric in metrics]])
         compact_row = [model]
         for metric in metrics:
@@ -106,9 +106,9 @@ def cls_table():
             compact_row.append(signed_ci(r["mean"], r["low"], r["high"]))
         compact.append(compact_row)
     write_table("cls.tex","@{}llrrr@{}",r"Model & Readout & Intervention $\rho$ & Mask AUROC & Enrichment",body)
-    write_table("cls_full.tex","@{}llrrr@{}",r"Model & Readout & Intervention $\rho$ & Mask AUROC & Enrichment",full)
+    write_table("cls_full.tex","@{}llrrr@{}",r"Model & Readout & Intervention $\rho$ & Foreground AUROC & Enrichment",full)
     write_table("cls_effects.tex","@{}llr@{}",r"Model & Endpoint & CLS $-$ all queries [95\% CI]",effects)
-    write_table("cls_compact.tex","@{}lrrr@{}",r"Model & $\Delta$ Intervention $\rho$ & $\Delta$ Mask AUROC & $\Delta$ Enrichment",compact)
+    write_table("cls_compact.tex","@{}lrrr@{}",r"Model & $\Delta$ Intervention $\rho$ & $\Delta$ Foreground AUROC & $\Delta$ Enrichment",compact)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)

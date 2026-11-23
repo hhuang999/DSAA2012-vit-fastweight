@@ -61,15 +61,17 @@ The numerical rebuild starts from the preserved per-image and per-layer exports 
 | Fig. 2, one image-conditioned head | `scripts/display/build_static_figures.py` (`fast_weight_lens`) and `paper/figures/fast_weight_lens.svg` | `paper/figures/fast_weight_lens.pdf` |
 | Fig. 3, diagnostics and alignment effects | `results/correct_tests.csv`; diagnostics from `results/diagnose.csv`; deletion contrasts in Appendix B | `paper/figures/diagnosis_correction_bridge.pdf` |
 | Fig. 4, spatial placement controls | `scripts/display/build_placement_figure.py` from `experiments/spatial/per_image.csv` | `paper/figures/placement_controls.pdf` |
-| Table 1, CLS vs all-query contrasts | `experiments/{cls,receiver_review/deit_b}/three_endpoint_contrasts.csv` | `paper/tables/cls_compact.tex`; full tables in `cls_full.tex`, `cls_effects.tex` |
+| Table 1, CLS vs all-query contrasts | `experiments/{cls,receiver_review/deit_b}/three_endpoint_contrasts.csv` | `paper/tables/cls_compact.tex`; full table in `cls_full.tex` |
 | Table A.1, original registered predictions | P1–P7 in `docs/preregistration.md` and preserved verdicts in `results/`, checked by `validate_research.py` | Interpretation and archive-label mapping in `paper/appendix.tex` |
+| Table A.2, Fig. A.1, setup and metric schematic | `scripts/display/build_appendix_figures.py` (`metrics_schematic`) | `paper/figures/metric_schematic.pdf` |
 | Fig. B.1, execution agreement | `results/k_sweep.csv` | `paper/figures/execution_k_sweep.pdf` |
+| Figs. B.2, C.1, norm recovery and probe errors | `scripts/display/build_appendix_figures.py` from `results/` | `paper/figures/{value_norm_recovery,probe_errors}.pdf` |
 | Tables B.1-B.4, scores, diagnostics, contrasts and sanity check | Registered summaries, paired differences and parameter-randomisation results | `paper/tables/{registered_main,diagnostics_per_layer,registered_paired,registered_sanity}.tex` |
 | Table C.1, probe-relocation alternatives | `results/c2_analysis/` and `results/supplementary/` | `paper/tables/relocation_explanations.tex` |
 | Figs. D.1-D.2, fixed example maps | Gallery tensors in `outputs/table1/clickme/deit/`, [fixed indices](data/splits/gallery_selection.json) | `paper/figures/example_maps{,_more}.pdf` |
-| Tables B.5-B.6, endpoint and geometry checks | `experiments/endpoints/`, `experiments/geometry/` | `paper/tables/{endpoint,geometry}.tex`, [budget-wise deletion curves](docs/figures/deletion_curves.pdf) |
+| Tables B.5-B.6, Fig. B.3, endpoint and geometry checks | `experiments/endpoints/`, `experiments/geometry/`, `experiments/endpoints/plot_curves.py` | `paper/tables/{endpoint,geometry}.tex`, `paper/figures/deletion_curves.pdf` and [docs copy](docs/figures/deletion_curves.pdf) |
 
-Tables E.1-E.3 give the full spatial controls, receiver scores and paired contrasts behind Fig. 4 and Table 1. In the archived scores, R0 is received attention; C1, C2 and C3 denote mean subtraction, probe relocation and value weighting. R_all combines the three.
+Tables E.1-E.2 give the full spatial controls and receiver scores behind Fig. 4 and Table 1. In the archived scores, R0 is received attention; C1, C2 and C3 denote mean subtraction, probe relocation and value weighting. R_all combines the three.
 
 Run `python scripts/display/build.py` for the generated items in the table and `python scripts/build_paper.py` to typeset them, including the registration table and key code. The [registered experiment guide](docs/reproduce.md) traces the numerical results to their producing configurations. The [exploratory guide](experiments/README.md) gives the commands for regenerating Oxford readouts, geometry, deletion endpoints and paired uncertainty estimates.
 

@@ -8,18 +8,19 @@ from pathlib import Path
 import matplotlib as mpl
 
 mpl.use("Agg")
-import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
+import matplotlib.font_manager  # noqa: E402
+import matplotlib.pyplot as plt  # noqa: E402
+import numpy as np  # noqa: E402
+import pandas as pd  # noqa: E402
 
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 BUDGETS = (1, 2, 4, 8, 16, 32, 64, 98, 147)
 MODELS = {
-    "deit": ("DeiT-S", "#0072B2", "o", -0.055),
-    "deit_b": ("DeiT-B", "#D55E00", "s", 0.000),
-    "dino": ("DINO", "#3D6557", "^", 0.055),
+    "deit": ("DeiT-S", "#2F6685", "o", -0.055),
+    "deit_b": ("DeiT-B", "#BB7D32", "s", 0.000),
+    "dino": ("DINO ViT-S", "#7B6A90", "^", 0.055),
 }
 
 
@@ -35,9 +36,14 @@ def plot(input_path: Path, output_path: Path, preview_formats: bool = False) -> 
         if tuple(sorted(group.budget)) != BUDGETS or not (group.low <= group["mean"]).all() or not (group["mean"] <= group.high).all():
             raise ValueError(f"Incomplete or invalid interval: {metric}, {model}")
 
+    for path in ("/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+                 "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf"):
+        if Path(path).exists():
+            matplotlib.font_manager.fontManager.addfont(path)
+
     mpl.rcParams.update({
         "font.family": "sans-serif",
-        "font.sans-serif": ["Arial", "Helvetica", "DejaVu Sans", "sans-serif"],
+        "font.sans-serif": ["Liberation Sans", "Arial", "Helvetica", "DejaVu Sans", "sans-serif"],
         "pdf.fonttype": 42,
         "svg.fonttype": "none",
         "font.size": 7,
@@ -54,8 +60,8 @@ def plot(input_path: Path, output_path: Path, preview_formats: bool = False) -> 
     fig, axes = plt.subplots(1, 2, figsize=(5.5, 2.55), dpi=300)
     fig.subplots_adjust(left=0.105, right=0.985, bottom=0.205, top=0.765, wspace=0.35)
     specs = (
-        ("p_target", "Original top-1 probability", "Δ probability", (-0.007, 0.034)),
-        ("kl", "KL from original output", "Δ KL (nats)", (-0.058, 0.185)),
+        ("p_target", "Probability separation", "Δ separation", (-0.007, 0.034)),
+        ("kl", "KL separation", "Δ separation (nats)", (-0.058, 0.185)),
     )
     for ax, (metric, title, ylabel, ylim), letter in zip(axes, specs, "ab"):
         ax.axhline(0, color="#777777", lw=0.65, zorder=0)
@@ -89,7 +95,8 @@ def plot(input_path: Path, output_path: Path, preview_formats: bool = False) -> 
                ncol=3, handlelength=1.5, columnspacing=1.9)
     fig.text(0.545, 0.065, "Removed patches", ha="center", va="center", fontsize=7)
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(output_path, metadata={"Title": "C3 versus no-high control: deletion-budget contrasts",
+    fig.savefig(output_path, metadata={"CreationDate": None, "ModDate": None,
+                                       "Title": "C3 versus no-high control: deletion-budget contrasts",
                                        "Creator": "experiments/endpoints/plot_curves.py"})
     if preview_formats:
         fig.savefig(output_path.with_suffix(".svg"))

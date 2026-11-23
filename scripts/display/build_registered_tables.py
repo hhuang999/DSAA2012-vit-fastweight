@@ -80,15 +80,15 @@ def main_results():
         r"\toprule",
         r" & \multicolumn{3}{c}{DeiT-S} & \multicolumn{3}{c}{DeiT-B} & \multicolumn{3}{c}{DINO ViT-S}\\",
         r"\cmidrule(r{6pt}){2-4}\cmidrule(r{6pt}){5-7}\cmidrule{8-10}",
-        "Reading" + " & Enr. & Click. & Del." * 3 + r"\\",
+        "Readout" + " & Enr. & Click. & Del." * 3 + r"\\",
         r"\midrule",
         row("Received attention", "R0", False),
         row("Value weighting", "C3"),
-        row(r"\quad zero high-norm scores", "stand_in_no_high"),
+        row(r"\quad high-norm zeroing (control)", "stand_in_no_high"),
         row("Mean-map subtraction", "C1"),
-        row(r"\quad subtract centre Gaussian", "stand_in_centre"),
+        row(r"\quad centred-Gaussian subtraction (control)", "stand_in_centre"),
         row("Probe relocation", "C2"),
-        row(r"\quad matched blur", "stand_in_blur"),
+        row(r"\quad matched-displacement blur (control)", "stand_in_blur"),
         row("All three corrections", "R_all"),
         r"\midrule",
         variant_row("+ test-time register", "register"),
@@ -108,9 +108,9 @@ def paired_differences():
         ("Mean-map subtraction $-$ received attention", "C1", "R0"),
         ("Probe relocation $-$ received attention", "C2", "R0"),
         ("All three corrections $-$ received attention", "R_all", "R0"),
-        ("Value weighting $-$ zero high-norm scores (its control)", "C3", "stand_in_no_high"),
-        ("Mean-map subtraction $-$ centre-Gaussian subtraction (its control)", "C1", "stand_in_centre"),
-        ("Probe relocation $-$ matched blur (its control)", "C2", "stand_in_blur"),
+        ("Value weighting $-$ high-norm zeroing (matched control)", "C3", "stand_in_no_high"),
+        ("Mean-map subtraction $-$ centred-Gaussian subtraction (matched control)", "C1", "stand_in_centre"),
+        ("Probe relocation $-$ matched-displacement blur (matched control)", "C2", "stand_in_blur"),
     )
 
     def cell(row):
@@ -142,10 +142,12 @@ def sanity_check():
                ("All three corrections", "R_all"), ("Centre Gaussian", "centre"))
     lines = ["% Historical registered randomisation results from results/sanity.csv.",
              r"\begin{tabular}{@{}lrrr@{}}", r"\toprule",
-             r"Reading & DeiT-S & DeiT-B & DINO ViT-S\\", r"\midrule"]
+             r"Readout & DeiT-S & DeiT-B & DINO ViT-S\\", r"\midrule"]
     for label, method in methods:
         if method == "centre":
             lines.append(r"\midrule")
+            lines.append("Centred Gaussian & " + " & ".join(number(rows[model, method]["median"]) for model in MODELS) + r" \\")
+            continue
         lines.append(label + " & " + " & ".join(number(rows[model, method]["median"]) for model in MODELS) + r" \\")
     lines.extend((r"\bottomrule", r"\end{tabular}"))
     write("registered_sanity.tex", lines)
@@ -158,10 +160,10 @@ def diagnostics_per_layer():
     lines = ["% Generated from results/diagnose.csv.", r"\footnotesize", r"\setlength{\tabcolsep}{2.6pt}",
              r"\begin{tabular}{r" + r" >{\centering\arraybackslash}p{0.8cm}" * 9 +
              r" >{\centering\arraybackslash}p{1.05cm}" * 3 + "}", r"\toprule",
-             " & \\multicolumn{3}{c}{\\makecell{Specificity:\\\\mean-map share (\\%)}}"
-             " & \\multicolumn{3}{c}{\\makecell{Location:\\\\probe accuracy (\\%)}}"
-             " & \\multicolumn{3}{c}{\\makecell{Output magnitude:\\\\high-norm share (\\%)}}"
-             " & \\multicolumn{3}{c}{\\makecell{Map quality:\\\\ClickMe alignment}} \\\\",
+             " & \\multicolumn{3}{c}{\\makecell{H1: mean-map\\\\share (\\%)}}"
+             " & \\multicolumn{3}{c}{\\makecell{H2: probe\\\\accuracy (\\%)}}"
+             " & \\multicolumn{3}{c}{\\makecell{H3: high-norm\\\\attention (\\%)}}"
+             " & \\multicolumn{3}{c}{\\makecell{ClickMe alignment\\\\(received attention)}} \\\\",
              r"\cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(lr){8-10}\cmidrule(lr){11-13}",
              "Layer" + " & S & B & D" * 4 + r" \\", r"\midrule"]
     for layer in range(1, 13):

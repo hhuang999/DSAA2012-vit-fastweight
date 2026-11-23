@@ -9,10 +9,11 @@ from pathlib import Path
 import matplotlib as mpl
 
 mpl.use("Agg")
-import matplotlib.pyplot as plt
-from matplotlib.lines import Line2D
-from matplotlib.patches import Patch
-import numpy as np
+import matplotlib.font_manager  # noqa: E402
+import matplotlib.pyplot as plt  # noqa: E402
+from matplotlib.lines import Line2D  # noqa: E402
+from matplotlib.patches import Patch  # noqa: E402
+import numpy as np  # noqa: E402
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -139,7 +140,7 @@ def make_bridge_figure(diagnostics, tests, out):
     paired_data = []
     for index, (ax, method, title) in enumerate(zip(
             low_axes, ("C1", "C2", "C3"),
-            ("Mean subtraction", "Probe relocation", "Value weighting"))):
+            ("Mean-map subtraction", "Probe relocation", "Value weighting"))):
         letter = chr(100 + index)
         ax.set_gid(letter)
         panel_header(ax, letter, title, subtitle="Correction", pad=12)
@@ -161,7 +162,7 @@ def make_bridge_figure(diagnostics, tests, out):
                handletextpad=0.4, columnspacing=1.2)
     ref_handles = [Line2D([], [], color="#505050", marker=marker, mfc="white", ms=3.5,
                           lw=0, label=label) for marker, label in
-                   (("o", "Vs received attention"), ("D", "Vs matched control"))]
+                   (("o", "vs. received attention"), ("D", "vs. matched control"))]
     fig.legend(handles=ref_handles, loc="lower center", bbox_to_anchor=(0.55, 0.005),
                frameon=False, ncol=2, fontsize=7, handletextpad=0.4,
                columnspacing=1.8)
@@ -184,8 +185,12 @@ def main():
     args = parser.parse_args()
 
     args.out.mkdir(parents=True, exist_ok=True)
+    for path in ("/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+                 "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf"):
+        if Path(path).exists():
+            matplotlib.font_manager.fontManager.addfont(path)
     mpl.rcParams.update({
-        "font.family": "sans-serif", "font.sans-serif": ["Arial", "DejaVu Sans"],
+        "font.family": "sans-serif", "font.sans-serif": ["Liberation Sans", "Arial", "DejaVu Sans"],
         "font.size": 7.2, "axes.labelsize": 7.2, "xtick.labelsize": 7,
         "ytick.labelsize": 7, "axes.linewidth": 0.6,
         "axes.spines.top": False, "axes.spines.right": False,
