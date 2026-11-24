@@ -110,10 +110,11 @@ def metrics_schematic(out):
     ax.plot(f, lif, color=COLORS["deit"], lw=1.0)
     ax.plot(f, mif, color=GREY, lw=1.0, ls="--")
     ax.fill_between(f, mif, lif, color=COLORS["deit"], alpha=0.13, lw=0)
-    ax.text(0.73, 0.70, "least important first", fontsize=6.1, color=COLORS["deit"], ha="right", va="top")
-    ax.text(0.73, 0.22, "most important\nfirst", fontsize=6.1, color="#555555", ha="right", va="bottom",
+    ax.text(0.73, 0.75, "least important\nfirst", fontsize=6.1, color=COLORS["deit"], ha="right", va="top",
             linespacing=1.1)
-    ax.text(0.19, 0.50, "deletion\nscore", fontsize=6.4, ha="center")
+    ax.text(0.73, 0.20, "most important\nfirst", fontsize=6.1, color="#555555", ha="right", va="bottom",
+            linespacing=1.1)
+    ax.text(0.25, 0.54, "deletion\nscore", fontsize=6.4, ha="center", va="center")
     ax.set_xlim(0, 0.75)
     ax.set_ylim(0, 1.05)
     ax.set_xlabel("Fraction of patches removed")
@@ -131,10 +132,10 @@ def value_norm_and_recovery(results, out):
     ax = axes[0]
     data = rows(results / "value_norm.csv")
     for model in ("deit", "deit_b"):
-        pts = [(int(r["layer"]), float(r["value_ratio"])) for r in data
-               if r["model"] == model and r["layer"].isdigit() and r["value_ratio"]]
-        pts.sort()
-        x, y = zip(*pts)
+        by_layer = {int(r["layer"]): float(r["value_ratio"]) for r in data
+                    if r["model"] == model and r["layer"].isdigit() and r["value_ratio"]}
+        x = list(range(1, 13))
+        y = [by_layer.get(layer, np.nan) for layer in x]
         ax.plot(x, y, color=COLORS[model], ls=STYLES[model], lw=1.05, marker="o", ms=2.2,
                 label=NAMES[model])
     ax.axhline(1, color=GREY, lw=0.6)
