@@ -1,14 +1,16 @@
 \begin{tabular}{@{}llrrr@{}}
 \toprule
-Model & Paired layer-12 contrast & Binary SRG [95\% CI] & Prob. sep. [95\% CI] & KL sep. [95\% CI] \\
+Model & Layer-12 baseline / paired contrast & Binary SRG [95\% CI] & Prob. sep. [95\% CI] & KL sep. [95\% CI] \\
 \midrule
-DeiT-S & CLS value weighting $-$ all-query $C_3$ & $-$0.031 [$-$0.063, +0.000] & $-$0.025 [$-$0.038, $-$0.011] & $-$0.131 [$-$0.188, $-$0.072] \\
+DeiT-S & All-query $R_0$ (baseline mean) & 0.244 [0.210, 0.279] & 0.156 [0.132, 0.179] & 0.931 [0.804, 1.061] \\
+ & CLS value weighting $-$ all-query $C_3$ & $-$0.031 [$-$0.063, +0.000] & $-$0.025 [$-$0.038, $-$0.011] & $-$0.131 [$-$0.188, $-$0.072] \\
  & CLS net contribution $-$ all-query $C_3$ & $-$0.038 [$-$0.067, $-$0.005] & $-$0.030 [$-$0.043, $-$0.016] & $-$0.131 [$-$0.191, $-$0.075] \\
- & CLS net contribution $-$ CLS value weighting & $-$0.007 [$-$0.027, +0.014] & $-$0.005 [$-$0.011, +0.000] & $-$0.000 [$-$0.024, +0.026] \\
+ & CLS net contribution $-$ CLS value weighting & $-$0.007 [$-$0.027, +0.014] & $-$0.005 [$-$0.011, +0.000] & +0.000 [$-$0.024, +0.026] \\
  & CLS net contribution $-$ all-query $R_0$ & $-$0.029 [$-$0.059, +0.003] & $-$0.023 [$-$0.038, $-$0.009] & $-$0.099 [$-$0.164, $-$0.034] \\
  & All-query $C_3$ $-$ all-query $R_0$ & +0.009 [$-$0.007, +0.025] & +0.007 [+0.002, +0.011] & +0.033 [+0.007, +0.061] \\
 \midrule
-DeiT-B & CLS value weighting $-$ all-query $C_3$ & +0.026 [+0.002, +0.054] & +0.003 [$-$0.008, +0.016] & +0.055 [$-$0.002, +0.111] \\
+DeiT-B & All-query $R_0$ (baseline mean) & 0.089 [0.049, 0.126] & 0.063 [0.038, 0.088] & 0.450 [0.317, 0.589] \\
+ & CLS value weighting $-$ all-query $C_3$ & +0.026 [+0.002, +0.054] & +0.003 [$-$0.008, +0.016] & +0.055 [$-$0.002, +0.111] \\
  & CLS net contribution $-$ all-query $C_3$ & +0.038 [+0.012, +0.064] & +0.009 [$-$0.004, +0.023] & +0.085 [+0.026, +0.142] \\
  & CLS net contribution $-$ CLS value weighting & +0.011 [$-$0.008, +0.030] & +0.006 [$-$0.001, +0.013] & +0.031 [$-$0.001, +0.062] \\
  & CLS net contribution $-$ all-query $R_0$ & +0.063 [+0.033, +0.093] & +0.025 [+0.010, +0.040] & +0.189 [+0.127, +0.252] \\

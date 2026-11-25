@@ -1,32 +1,32 @@
 \begin{tabular}{@{}llrrrrl@{}}
 \toprule
-Model & Readout & Enr. & $\Delta$Enr. & AUROC & $\Delta$AUROC & L12 outlier attention \\
+Model & Readout & Enr. & $\Delta$Enr. & AUROC & $\Delta$AUROC & L12 flagged (patches / attn) \\
 \midrule
-DeiT-S & Received attention & 0.141 & --- & 0.788 & --- & L12 $>3\times$: 8.6\% attn \\
- & Zero $>3\times$ outliers & 0.146 & +0.005 & 0.798 & +0.010 & L12 $>1.5\times$: 48.0\% attn \\
- & Soft $>3\times$ outliers only & 0.141 & $-$0.000 & 0.788 & $-$0.000 &  \\
+DeiT-S & Received attention & 0.141 & --- & 0.788 & --- &  \\
+ & Zero $>3\times$ outliers & 0.146 & +0.005 & 0.798 & +0.010 & 0.5\% / 8.6\% \\
+ & Soft $>3\times$ outliers only & 0.141 & +0.000 & 0.788 & +0.000 &  \\
  & Zero $>3\times$ + weight rest & 0.164 & +0.023 & 0.826 & +0.038 &  \\
  & Shuffle non-outliers (ring) & 0.139 & $-$0.001 & 0.794 & +0.006 &  \\
- & Zero $>2\times$ patches & 0.159 & +0.019 & 0.821 & +0.033 &  \\
- & Zero $>1.5\times$ patches & 0.179 & +0.038 & 0.851 & +0.063 &  \\
+ & Zero $>2\times$ patches & 0.159 & +0.019 & 0.821 & +0.033 & 2.1\% / 25.7\% \\
+ & Zero $>1.5\times$ patches & 0.179 & +0.038 & 0.851 & +0.063 & 5.9\% / 48.0\% \\
  & Value weighting (full) & 0.160 & +0.019 & 0.817 & +0.028 &  \\
 \midrule
-DeiT-B & Received attention & 0.088 & --- & 0.672 & --- & L12 $>3\times$: 25.6\% attn \\
- & Zero $>3\times$ outliers & 0.107 & +0.019 & 0.707 & +0.035 & L12 $>1.5\times$: 63.4\% attn \\
+DeiT-B & Received attention & 0.088 & --- & 0.672 & --- &  \\
+ & Zero $>3\times$ outliers & 0.107 & +0.019 & 0.707 & +0.035 & 2.2\% / 25.6\% \\
  & Soft $>3\times$ outliers only & 0.084 & $-$0.004 & 0.676 & +0.003 &  \\
  & Zero $>3\times$ + weight rest & 0.138 & +0.051 & 0.759 & +0.087 &  \\
  & Shuffle non-outliers (ring) & 0.085 & $-$0.003 & 0.686 & +0.014 &  \\
- & Zero $>2\times$ patches & 0.133 & +0.045 & 0.743 & +0.071 &  \\
- & Zero $>1.5\times$ patches & 0.149 & +0.062 & 0.764 & +0.091 &  \\
+ & Zero $>2\times$ patches & 0.133 & +0.045 & 0.743 & +0.071 & 6.6\% / 46.3\% \\
+ & Zero $>1.5\times$ patches & 0.149 & +0.062 & 0.764 & +0.091 & 13.2\% / 63.4\% \\
  & Value weighting (full) & 0.121 & +0.033 & 0.722 & +0.050 &  \\
 \midrule
-DINO ViT-S & Received attention & 0.211 & --- & 0.914 & --- & L12 $>3\times$: 0.0\% attn \\
- & Zero $>3\times$ outliers & 0.211 & +0.000 & 0.914 & +0.000 & L12 $>1.5\times$: 1.1\% attn \\
+DINO ViT-S & Received attention & 0.211 & --- & 0.914 & --- &  \\
+ & Zero $>3\times$ outliers & 0.211 & +0.000 & 0.914 & +0.000 & 0.0\% / 0.0\% \\
  & Soft $>3\times$ outliers only & 0.212 & +0.001 & 0.918 & +0.003 &  \\
  & Zero $>3\times$ + weight rest & 0.206 & $-$0.005 & 0.906 & $-$0.008 &  \\
  & Shuffle non-outliers (ring) & 0.210 & $-$0.001 & 0.915 & +0.000 &  \\
- & Zero $>2\times$ patches & 0.211 & $-$0.000 & 0.914 & $-$0.000 &  \\
- & Zero $>1.5\times$ patches & 0.212 & +0.001 & 0.915 & +0.001 &  \\
+ & Zero $>2\times$ patches & 0.211 & +0.000 & 0.914 & +0.000 & 0.0\% / 0.0\% \\
+ & Zero $>1.5\times$ patches & 0.212 & +0.001 & 0.915 & +0.001 & 0.6\% / 1.1\% \\
  & Value weighting (full) & 0.206 & $-$0.005 & 0.906 & $-$0.008 &  \\
 \bottomrule
 \end{tabular}

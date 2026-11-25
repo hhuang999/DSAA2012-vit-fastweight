@@ -58,19 +58,24 @@ def paired_ci(a: np.ndarray, b: np.ndarray) -> tuple[float, float, float]:
     return mean, float(mean - lo), float(hi - mean)
 
 
+def _clean_zero(v: float, decimals: int) -> float:
+    return 0.0 if abs(v) < 0.5 * (10.0 ** (-decimals)) else float(v)
+
+
 def fmt_val(v: float, decimals: int = 3) -> str:
-    s = f"{v:.{decimals}f}"
+    s = f"{_clean_zero(v, decimals):.{decimals}f}"
     return s.replace("-", "$-$")
 
 
 def fmt_signed(v: float, decimals: int = 3) -> str:
-    s = f"{v:+.{decimals}f}"
+    s = f"{_clean_zero(v, decimals):+.{decimals}f}"
     return s.replace("-", "$-$")
 
 
 def fmt_ci_dict(d: dict, decimals: int = 3, signed: bool = True) -> str:
-    m = d["mean"]
-    lo, hi = d["ci95"]
+    m = _clean_zero(d["mean"], decimals)
+    lo = _clean_zero(d["ci95"][0], decimals)
+    hi = _clean_zero(d["ci95"][1], decimals)
     if signed:
         s = f"{m:+.{decimals}f} [{lo:+.{decimals}f}, {hi:+.{decimals}f}]"
     else:
@@ -210,19 +215,17 @@ def build_tables():
         ("Z_out_1.5", "Zero $>1.5\\times$ patches"),
         ("C3", "Value weighting (full)"),
     ]
+    tau_row_map = {"Z_out_3.0": 3.0, "Z_out_2.0": 2.0, "Z_out_1.5": 1.5}
     body1 = []
     for mk, mname in (("deit", "DeiT-S"), ("deit_b", "DeiT-B"), ("dino", "DINO ViT-S")):
         md = dec["models"][mk]["methods"]
-        d3 = l12_diag[(mk, 3.0)]
-        d15 = l12_diag[(mk, 1.5)]
         for idx, (mkey, mlabel) in enumerate(rows_dec):
             e = md["enrichment"][mkey]
             a = md["auroc"][mkey]
             model_col = mname if idx == 0 else ""
-            if idx == 0:
-                extra = f"L12 $>3\\times$: {float(d3['attn_share_pct']):.1f}\\% attn"
-            elif idx == 1:
-                extra = f"L12 $>1.5\\times$: {float(d15['attn_share_pct']):.1f}\\% attn"
+            if mkey in tau_row_map:
+                d = l12_diag[(mk, tau_row_map[mkey])]
+                extra = f"{float(d['patch_frac_pct']):.1f}\\% / {float(d['attn_share_pct']):.1f}\\%"
             else:
                 extra = ""
             body1.append([
@@ -239,7 +242,7 @@ def build_tables():
     write_table(
         "v22_decomposition.tex",
         "@{}llrrrrl@{}",
-        r"Model & Readout & Enr. & $\Delta$Enr. & AUROC & $\Delta$AUROC & L12 outlier attention",
+        r"Model & Readout & Enr. & $\Delta$Enr. & AUROC & $\Delta$AUROC & L12 flagged (patches / attn)",
         body1,
     )
 
@@ -262,82 +265,92 @@ def build_tables():
         md = reg["models"][mk]
         ce = md["contrasts"]["enrichment"]
         ca = md["contrasts"]["auroc"]
+        r0_auroc = md["methods"]["auroc"]["R0"]["mean"]
         body2.append([
             lbl,
             f"{peak_attn[mk]:.1f}\\%",
+            fmt_val(r0_auroc),
             fmt_ci_dict(ce["C3_minus_R0"]),
             fmt_ci_dict(ca["C3_minus_R0"]),
             fmt_ci_dict(ca["NonOut_vw_zeroOut_minus_Z_out_3.0"]),
-            fmt_ci_dict(ca["C3_minus_NonOut_ring_shuffle"]),
+            fmt_ci_dict(ca["C3_minus_NonOut_ring_shuffle"], decimals=4),
         ])
     write_table(
         "v22_registers.tex",
-        "@{}lrrrrr@{}",
-        r"Model (grid) & Peak $>3\times$ attn & $\Delta$Enr. ($C_3{-}R_0$) & $\Delta$AUROC ($C_3{-}R_0$) & $\Delta$AUROC (non-out.) & $\Delta$AUROC (spatial)",
+        "@{}lrrrrrr@{}",
+        r"Model (grid) & Peak $>3\times$ attn & $R_0$ AUROC & $\Delta$Enr. ($C_3{-}R_0$) & $\Delta$AUROC ($C_3{-}R_0$) & $\Delta$AUROC (non-out.) & $\Delta$AUROC (spatial)",
         body2,
     )
 
-    # 3. v22_feature_origin.tex
+    # 3. v22_feature_origin.tex (two-panel table: A = token-level construct validity, B = L12 full-map relocation vs R0)
     fo = json.loads((EXP / "feature_origin/summary.json").read_text(encoding="utf-8"))
-    body3 = []
-    for mk, mname in (("deit", "DeiT-S"), ("deit_b", "DeiT-B")):
-        cv = fo["construct_validity"][mk]
-        rel = fo["relocation"][mk]
-        for sub, slabel in (("background", "All background"), ("high_norm_bg", "High-norm bg")):
-            s = cv[sub]
-            body3.append([
-                mname if sub == "background" else "",
-                slabel,
-                f"{s['P_self']['mean']:.3f} / {s['Q_self']['mean']:.3f}",
-                f"{s['P_euclid_disp']['mean']:.2f} / {s['Q_euclid_disp']['mean']:.2f}",
-                f"{s['P_fg_mass']['mean']:.3f} / {s['Q_fg_mass']['mean']:.3f}",
-                fmt_ci_dict(rel["enrichment"]["contrasts"]["C2_causal_Q_minus_R0"]) if sub == "background" else fmt_ci_dict(rel["enrichment"]["contrasts"]["C2_probe_minus_R0"]),
-                fmt_ci_dict(rel["auroc"]["contrasts"]["C2_causal_Q_minus_R0"]) if sub == "background" else fmt_ci_dict(rel["auroc"]["contrasts"]["C2_probe_minus_R0"]),
-            ])
-        if mk == "deit":
-            body3.append(["\\midrule"])
-    # Wait: make row labels explicit so causal Q vs probe relocation isn't conflated with subset rows!
-    body3_clean = []
-    for mk, mname in (("deit", "DeiT-S"), ("deit_b", "DeiT-B")):
-        cv = fo["construct_validity"][mk]
-        rel = fo["relocation"][mk]
-        bg = cv["background"]
-        hn = cv["high_norm_bg"]
-        body3_clean.append([
-            mname,
-            "Bg ($P$ / $Q$ / $Q^{\\mathrm{sq}}$)",
-            f"{bg['P_self']['mean']:.3f} / {bg['Q_self']['mean']:.3f} / {bg['Qsq_self']['mean']:.3f}",
-            f"{bg['P_euclid_disp']['mean']:.2f} / {bg['Q_euclid_disp']['mean']:.2f} / {bg['Qsq_euclid_disp']['mean']:.2f}",
-            f"{bg['P_fg_mass']['mean']:.3f} / {bg['Q_fg_mass']['mean']:.3f}",
-            f"Causal $Q$: {fmt_ci_dict(rel['enrichment']['contrasts']['C2_causal_Q_minus_R0'])}",
-            f"Causal $Q$: {fmt_ci_dict(rel['auroc']['contrasts']['C2_causal_Q_minus_R0'])}",
-        ])
-        body3_clean.append([
-            "",
-            "High-norm bg ($P$ / $Q$ / $Q^{\\mathrm{sq}}$)",
-            f"{hn['P_self']['mean']:.3f} / {hn['Q_self']['mean']:.3f} / {hn['Qsq_self']['mean']:.3f}",
-            f"{hn['P_euclid_disp']['mean']:.2f} / {hn['Q_euclid_disp']['mean']:.2f} / {hn['Qsq_euclid_disp']['mean']:.2f}",
-            f"{hn['P_fg_mass']['mean']:.3f} / {hn['Q_fg_mass']['mean']:.3f}",
-            f"Probe $P$: {fmt_ci_dict(rel['enrichment']['contrasts']['C2_probe_minus_R0'])}",
-            f"Probe $P$: {fmt_ci_dict(rel['auroc']['contrasts']['C2_probe_minus_R0'])}",
-        ])
-        body3_clean.append([
-            "",
-            "All patches (ref $C_3$ vs. $Q^{\\mathrm{sq}}$)",
-            f"{cv['all']['P_self']['mean']:.3f} / {cv['all']['Q_self']['mean']:.3f} / {cv['all']['Qsq_self']['mean']:.3f}",
-            f"{cv['all']['P_euclid_disp']['mean']:.2f} / {cv['all']['Q_euclid_disp']['mean']:.2f} / {cv['all']['Qsq_euclid_disp']['mean']:.2f}",
-            f"{cv['all']['P_fg_mass']['mean']:.3f} / {cv['all']['Q_fg_mass']['mean']:.3f}",
-            f"$Q^{{\\mathrm{{sq}}}}$: {fmt_ci_dict(rel['enrichment']['contrasts']['C2_causal_Qsq_minus_R0'])}",
-            f"$C_3$: {fmt_ci_dict(rel['enrichment']['contrasts']['C3_minus_R0'])}",
-        ])
-        if mk == "deit":
-            body3_clean.append(["\\midrule"])
-    write_table(
-        "v22_feature_origin.tex",
-        "@{}llcccrr@{}",
-        r"Model & Token subset & Self-mass & Mean disp. (patches) & Fg mass ($P$/$Q$) & L12 $\Delta$Enr. ($-R_0$) & L12 $\Delta$AUROC / ref",
-        body3_clean,
+    lines3 = [
+        r"\begin{tabular}{@{}llccc@{}}",
+        r"\toprule",
+        r"\multicolumn{5}{@{}l}{\textbf{A. Layer-12 token-level construct validity ($P$ / $Q$ / $Q^{\mathrm{sq}}$)}} \\",
+        r"\midrule",
+        r"Model & Token subset & Self-slot mass (\%) & Mean disp. (patches) & Fg mass $P$ / $Q$ (\%) \\",
+        r"\midrule",
+    ]
+    subset_specs = (
+        ("background", "All background"),
+        ("high_norm_bg", "High-norm bg"),
+        ("all", "All patches"),
     )
+    for mk, mname in (("deit", "DeiT-S"), ("deit_b", "DeiT-B")):
+        cv = fo["construct_validity"][mk]
+        for idx, (skey, slabel) in enumerate(subset_specs):
+            s = cv[skey]
+            mcol = mname if idx == 0 else ""
+            self_pct = (
+                f"{100.0 * s['P_self']['mean']:.1f} / "
+                f"{100.0 * s['Q_self']['mean']:.1f} / "
+                f"{100.0 * s['Qsq_self']['mean']:.1f}"
+            )
+            disp_str = (
+                f"{s['P_euclid_disp']['mean']:.2f} / "
+                f"{s['Q_euclid_disp']['mean']:.2f} / "
+                f"{s['Qsq_euclid_disp']['mean']:.2f}"
+            )
+            fg_pct = f"{100.0 * s['P_fg_mass']['mean']:.1f} / {100.0 * s['Q_fg_mass']['mean']:.1f}"
+            lines3.append(" & ".join([mcol, slabel, self_pct, disp_str, fg_pct]) + r" \\")
+        if mk == "deit":
+            lines3.append(r"\midrule")
+
+    lines3 += [
+        r"\midrule",
+        r"\multicolumn{5}{@{}l}{\textbf{B. Layer-12 full-map readouts vs.\ received attention ($R_0$)}} \\",
+        r"\midrule",
+        r"Model & Readout contrast & Mean Enr. / AUROC & $\Delta$Enrichment [95\% CI] & $\Delta$AUROC [95\% CI] \\",
+        r"\midrule",
+    ]
+    reloc_rows = (
+        ("C2_probe", "C2_probe_minus_R0", "Probe relocation ($P$)"),
+        ("C2_causal_Q", "C2_causal_Q_minus_R0", "Causal relocation ($Q$)"),
+        ("C2_causal_Qsq", "C2_causal_Qsq_minus_R0", "Squared causal ($Q^{\\mathrm{sq}}$)"),
+        ("C3", "C3_minus_R0", "Value weighting ($C_3$, ref.)"),
+    )
+    for mk, mname in (("deit", "DeiT-S"), ("deit_b", "DeiT-B")):
+        rel = fo["relocation"][mk]
+        em = rel["enrichment"]["means"]
+        am = rel["auroc"]["means"]
+        ec = rel["enrichment"]["contrasts"]
+        ac = rel["auroc"]["contrasts"]
+        for idx, (mkey, ckey, rlabel) in enumerate(reloc_rows):
+            mcol = mname if idx == 0 else ""
+            mean_pair = f"{fmt_val(em[mkey]['mean'])} / {fmt_val(am[mkey]['mean'])}"
+            lines3.append(" & ".join([
+                mcol,
+                rlabel,
+                mean_pair,
+                fmt_ci_dict(ec[ckey]),
+                fmt_ci_dict(ac[ckey]),
+            ]) + r" \\")
+        if mk == "deit":
+            lines3.append(r"\midrule")
+    lines3 += [r"\bottomrule", r"\end{tabular}"]
+    OUT_TAB.mkdir(parents=True, exist_ok=True)
+    (OUT_TAB / "v22_feature_origin.tex").write_text("\n".join(lines3) + "\n", encoding="utf-8", newline="\n")
 
     # 4. v22_cls_deletion.tex
     cd = json.loads((EXP / "cls_deletion/summary.json").read_text(encoding="utf-8"))
@@ -351,9 +364,16 @@ def build_tables():
     body4 = []
     for mk, mname in (("deit", "DeiT-S"), ("deit_b", "DeiT-B")):
         eps = cd["models"][mk]["endpoints"]
-        for idx, (ck, clabel) in enumerate(rows_cd):
+        body4.append([
+            mname,
+            "All-query $R_0$ (baseline mean)",
+            fmt_ci_dict(eps["srg_agree"]["means"]["all_r0"], signed=False),
+            fmt_ci_dict(eps["prob_sep"]["means"]["all_r0"], signed=False),
+            fmt_ci_dict(eps["kl_sep"]["means"]["all_r0"], signed=False),
+        ])
+        for ck, clabel in rows_cd:
             body4.append([
-                mname if idx == 0 else "",
+                "",
                 clabel,
                 fmt_ci_dict(eps["srg_agree"]["contrasts"][ck]),
                 fmt_ci_dict(eps["prob_sep"]["contrasts"][ck]),
@@ -364,7 +384,7 @@ def build_tables():
     write_table(
         "v22_cls_deletion.tex",
         "@{}llrrr@{}",
-        r"Model & Paired layer-12 contrast & Binary SRG [95\% CI] & Prob. sep. [95\% CI] & KL sep. [95\% CI]",
+        r"Model & Layer-12 baseline / paired contrast & Binary SRG [95\% CI] & Prob. sep. [95\% CI] & KL sep. [95\% CI]",
         body4,
     )
     print("v22_tables: v22_decomposition, v22_registers, v22_feature_origin, v22_cls_deletion")
