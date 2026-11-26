@@ -39,6 +39,8 @@ jobs:
         run: python -m pytest -q
       - name: Integrity and saved-output rebuild
         run: python scripts/validate_research.py --strict --rebuild --report build/ci-verification.json
+      - name: Audit exploratory v2.2 studies
+        run: python experiments/audit_v22.py
       - name: Rebuild paper figures and tables
         run: python scripts/display/build.py
       - name: Verify original artifacts are unchanged

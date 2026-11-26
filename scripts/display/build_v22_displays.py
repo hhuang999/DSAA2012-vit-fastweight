@@ -326,8 +326,8 @@ def build_tables():
     ]
     reloc_rows = (
         ("C2_probe", "C2_probe_minus_R0", "Probe relocation ($P$)"),
-        ("C2_causal_Q", "C2_causal_Q_minus_R0", "Causal relocation ($Q$)"),
-        ("C2_causal_Qsq", "C2_causal_Qsq_minus_R0", "Squared causal ($Q^{\\mathrm{sq}}$)"),
+        ("C2_causal_Q", "C2_causal_Q_minus_R0", "Masking relocation ($Q$)"),
+        ("C2_causal_Qsq", "C2_causal_Qsq_minus_R0", "Squared masking ($Q^{\\mathrm{sq}}$)"),
         ("C3", "C3_minus_R0", "Value weighting ($C_3$, ref.)"),
     )
     for mk, mname in (("deit", "DeiT-S"), ("deit_b", "DeiT-B")):

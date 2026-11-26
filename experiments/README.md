@@ -130,3 +130,18 @@ The historical hash prefixes `v13-spatial-2026:` and `v13-cls-2026:` are
 preserved **only because they determine the published fixed samples**. Both
 scripts check their recomputed selections against the committed name lists
 before scoring. No result-based filtering is applied.
+
+## Mechanism, cross-paradigm, feature-dependence, and CLS-deletion studies
+
+Four supplementary studies extend the Oxford-IIIT Pet and cross-model analyses in Fig. 4 and Appendix Tables B.4–B.5, C.1, and E.3 (each directory preserves its frozen `protocol.md`, `summary.json`, and `per_image.csv`):
+
+- **Mechanism decomposition (`experiments/decomposition/`):** `python -m experiments.decomposition.run_decomposition` separates `>3x` outlier zeroing from continuous non-outlier value weighting, within-ring non-outlier norm shuffling, and binary thresholds down to `1.5x` on the fixed 383-crop Oxford-IIIT Pet sample (`protocol.md`).
+- **Cross-paradigm & register controls (`experiments/registers/`):** `python -m experiments.registers.run_registers` evaluates unregistered DINOv2-S/B (`518x518`, `37x37` grid), matched four-register `DINOv2+reg4` models, and `CLIP ViT-B/16` (`224x224`, `14x14` grid) on 383–384 Oxford-IIIT Pet crops (`protocol.md`).
+- **Perturbation-based feature dependence (`experiments/feature_origin/`):** `python -m experiments.feature_origin.run_feature_origin` measures layer-12 L2 representation sensitivity to mean-pixel occlusion of each `16x16` input patch across 64 Oxford-IIIT Pet crops and evaluates masking-based attention relocation (`protocol.md`).
+- **Classifier-aligned patch-token deletion (`experiments/cls_deletion/`):** `python -m experiments.cls_deletion.run_cls_deletion` evaluates layer-12 post-embedding patch-token deletion (binary SRG, continuous probability separation, and KL separation) for all-query and CLS-only readouts (with and without cross-head cancellation) on the 128-crop DeiT-S/B sample (`protocol.md`).
+
+Verify all saved CSV/JSON summaries and bootstrap contrasts on CPU without downloading datasets or running GPU inference:
+
+```powershell
+python experiments/audit_v22.py
+```
